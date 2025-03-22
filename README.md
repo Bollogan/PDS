@@ -1,153 +1,137 @@
-# PDS
-PDS subject of 4th course on Software Engineering in UDC
-```mermaid
-erDiagram
-    SPORTS_CENTER {
-        int id PK
-        string name
-        string address
-        string phone
-        boolean isHeadquarters
-    }
+# MEMORIA
 
-    USER {
-        int id PK
-        string firstName
-        string lastName
-        string email
-        string password
-        string phone
-        date registrationDate
-        int registeredCenterId FK
-        int membershipTypeId FK
-    }
+## E-R MODEL
+```mermaid
+
+erDiagram
+    MEMBERSHIP_TYPE ||--o{ PAYMENT : fee
+    MEMBERSHIP_TYPE ||--o{ CLIENT : subscribed_by
+    CLIENT ||--o{ PAYMENT : makes
+
+    CLIENT }o--|| CENTER : assigned
+    CLIENT ||--o{ ACCESS : checks_in
+    CENTER ||--o{ ACCESS : records
+
+    CENTER ||--|{ ROOM : has
+    ROOM ||--o{ SERVICE : hosts
+    GYM |o--|| SERVICE : is_a
+    GUIDED_ACTIVITY |o--|| SERVICE : is_a
+    PHYSIO_SESSION |o--|| SERVICE : is_a
+    
+    CENTER ||--o{ ADMIN : employs
+    CENTER }o--o{ MONITOR : engages
+    CENTER ||--o{ MAINTENANCE : employs
+    CENTER ||--o{ PHYSIO : employs
+
+    ADMIN |o--|| STAFF : is_a
+    MONITOR |o--|| STAFF : is_a
+    MAINTENANCE |o--|| STAFF : is_a
+    PHYSIO |o--|| STAFF : is_a
+
+    ADMIN ||--o{ GUIDED_ACTIVITY : plans
+    MONITOR ||--o{ GUIDED_ACTIVITY : teaches
+    PHYSIO ||--o{ PHYSIO_SESSION : conducts
+    CLIENT ||--o{ RESERVATION : makes
+
+    SERVICE ||--o{ RESERVATION : reserved_by
 
     MEMBERSHIP_TYPE {
         int id PK
-        string name
-        decimal price
-        boolean includesClasses
-        boolean includesPhysiotherapy
-        int freePhysiotherapySessions
+        varchar name
+        decimal monthly_fee
+        int included_physio_sessions "Included physio per week"
+        decimal extra_physio_fee "Extra session fee"
     }
 
     PAYMENT {
         int id PK
-        int userId FK
-        int membershipTypeId FK
-        datetime paymentDate
+        date date "Payment date"
         decimal amount
-        string paymentMethod
+        int membership_type_id FK "MEMBERSHIP_TYPE.id"
+        int client_id FK "CLIENT.id"
+    }
+
+    CLIENT {
+        int id PK
+        varchar name
+        varchar qr_code "QR access code"
+        int center_id FK "CENTER.id"
+        int membership_type_id FK "MEMBERSHIP_TYPE.id"
     }
 
     ACCESS {
         int id PK
-        int userId FK
-        int sportsCenterId FK
-        datetime accessTime
-        string accessMethod
+        datetime timestamp "Access time"
+        int client_id FK "CLIENT.id"
+        int center_id FK "CENTER.id"
     }
 
-    BOOKING {
+    CENTER {
         int id PK
-        int userId FK
-        int classId FK
-        int roomId FK
-        int physiotherapySessionId FK
-        datetime startTime
-        datetime endTime
-        string status
+        varchar name
+        varchar address
+        varchar phone
+        boolean is_headquarter "Headquarter flag"
     }
-
-    CLASS {
-        int id PK
-        string name
-        int instructorId FK
-        int sportsCenterId FK
-        int roomId FK
-        int maxCapacity
-        datetime classTime
-        int duration
-    }
-
     ROOM {
         int id PK
-        string name
-        int sportsCenterId FK
-        int maxCapacity
+        varchar name
+        int center_id FK "CENTER.id"
     }
-
+    SERVICE {
+        int id PK
+        datetime start_time
+        datetime end_time
+        int max_users
+        int room_id FK "ROOM.id"
+    }
+    GYM {
+        int id PK, FK "SERVICE.id"
+        %% no additional fields
+    }
+    GUIDED_ACTIVITY {
+        int id PK, FK "SERVICE.id"
+        varchar activity_name "Class type"
+        int monitor_id FK "MONITOR.id"
+        int admin_id FK "ADMIN.id"
+    }
+    PHYSIO_SESSION {
+        int id PK, FK "SERVICE.id"
+        int physio_id FK "PHYSIO.id"
+    }
     STAFF {
         int id PK
-        string firstName
-        string lastName
-        string email
-        string phone
-        int sportsCenterId FK
-        string role
+        varchar name
+    }
+    ADMIN {
+        int id PK, FK "STAFF.id"
+        int center_id FK "CENTER.id"
     }
 
-    ADMINISTRATOR {
+    MONITOR {
+        int id PK, FK "STAFF.id"
+    }
+    MAINTENANCE {
+        int id PK, FK "STAFF.id"
+        int center_id FK "CENTER.id"
+    }
+
+    PHYSIO {
+        int id PK, FK "STAFF.id"
+        int center_id FK "CENTER.id"
+    }
+
+
+    RESERVATION {
         int id PK
+        int service_id FK "SERVICE.id"
+        int client_id FK "CLIENT.id"
+        boolean attended "Attended flag"
     }
+    
 
-    MAINTENANCE_WORKER {
-        int id PK
-        string shift
-    }
-
-    PHYSIOTHERAPIST {
-        int id PK
-        string certification
-    }
-
-    INSTRUCTOR {
-        int id PK
-        string specialty
-        boolean canRotateCenters
-    }
-
-    PHYSIOTHERAPY_SESSION {
-        int id PK
-        int physiotherapistId FK
-        int sportsCenterId FK
-        datetime sessionTime
-        decimal cost
-    }
-
-    OCCUPANCY_REPORT {
-        int id PK
-        int roomId FK
-        date reportDate
-        float occupancyRate
-    }
-
-    USER }|--|| SPORTS_CENTER : registers_at
-    USER ||--o{ ACCESS : can_enter
-    USER }|--|| MEMBERSHIP_TYPE : has
-    USER ||--o{ PAYMENT : makes
-    USER ||--o{ BOOKING : makes
-
-    STAFF ||--|{ INSTRUCTOR : is_a
-    STAFF ||--|{ PHYSIOTHERAPIST : is_a
-    STAFF ||--|{ ADMINISTRATOR : is_a
-    STAFF ||--|{ MAINTENANCE_WORKER : is_a
-
-    INSTRUCTOR ||--o{ CLASS : teaches
-    CLASS ||--|| ROOM : takes_place_in
-    CLASS ||--o{ BOOKING : requires
-
-    PHYSIOTHERAPIST ||--o{ PHYSIOTHERAPY_SESSION : provides
-    PHYSIOTHERAPY_SESSION ||--o{ BOOKING : requires
-
-    ADMINISTRATOR ||--o{ CLASS : manages
-
-    ROOM ||--o{ OCCUPANCY_REPORT : generates
-    ROOM ||--o{ BOOKING : requires
-
-    MEMBERSHIP_TYPE ||--o{ PAYMENT : changes_monthly
-    MEMBERSHIP_TYPE }|--|| PHYSIOTHERAPY_SESSION : defines_price
-
-    PAYMENT }|--|| MEMBERSHIP_TYPE : corresponds_to
 
 ```
+
+### Fisio y Rehabilitación son una sola actividad
+### QR establecido para cada cliente (se guarda, no se genera)
