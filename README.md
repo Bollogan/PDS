@@ -14,20 +14,23 @@ erDiagram
 
     CENTER ||--|{ ROOM : has
     ROOM ||--o{ SERVICE : hosts
+
     GYM |o--|| SERVICE : is_a
     ACTIVITY |o--|| SERVICE: is_a
+
     GUIDED_ACTIVITY |o--|| ACTIVITY : is_a
     PHYSIO_SESSION |o--|| ACTIVITY : is_a
-    
-    CENTER ||--o{ ADMIN : employs
-    CENTER }o--o{ MONITOR : engages
-    CENTER ||--o{ MAINTENANCE : employs
-    CENTER ||--o{ PHYSIO : employs
 
-    ADMIN |o--|| STAFF : is_a
+
+    CENTER ||--o{ EMPLOYEE : employs
+    CENTER }o--o{ MONITOR : engages
+
+    EMPLOYEE |o--|| STAFF : is_a
     MONITOR |o--|| STAFF : is_a
-    MAINTENANCE |o--|| STAFF : is_a
-    PHYSIO |o--|| STAFF : is_a
+
+    MAINTENANCE |o--|| EMPLOYEE : is_a
+    ADMIN |o--|| EMPLOYEE : is_a
+    PHYSIO |o--|| EMPLOYEE : is_a
 
     ADMIN ||--o{ GUIDED_ACTIVITY : plans
     MONITOR ||--o{ GUIDED_ACTIVITY : teaches
@@ -108,9 +111,12 @@ erDiagram
         int id PK
         varchar name
     }
+    EMPLOYEE {
+        int id PK,FK "STAFF.id"
+        int center_id FK "CENTER.id"
+    }
     ADMIN {
         int id PK, FK "STAFF.id"
-        int center_id FK "CENTER.id"
     }
 
     MONITOR {
@@ -118,12 +124,10 @@ erDiagram
     }
     MAINTENANCE {
         int id PK, FK "STAFF.id"
-        int center_id FK "CENTER.id"
     }
 
     PHYSIO {
         int id PK, FK "STAFF.id"
-        int center_id FK "CENTER.id"
     }
 
 
