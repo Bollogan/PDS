@@ -15,8 +15,9 @@ erDiagram
     CENTER ||--|{ ROOM : has
     ROOM ||--o{ SERVICE : hosts
     GYM |o--|| SERVICE : is_a
-    GUIDED_ACTIVITY |o--|| SERVICE : is_a
-    PHYSIO_SESSION |o--|| SERVICE : is_a
+    ACTIVITY |o--|| SERVICE: is_a
+    GUIDED_ACTIVITY |o--|| ACTIVITY : is_a
+    PHYSIO_SESSION |o--|| ACTIVITY : is_a
     
     CENTER ||--o{ ADMIN : employs
     CENTER }o--o{ MONITOR : engages
@@ -80,23 +81,27 @@ erDiagram
     }
     SERVICE {
         int id PK
-        datetime start_time
-        datetime end_time
         int max_users
         int room_id FK "ROOM.id"
     }
     GYM {
         int id PK, FK "SERVICE.id"
-        %% no additional fields
+        time opening_time
+        time closing_time
+    }
+    ACTIVITY {
+    int id PK, FK "SERVICE.id"
+    datetime start_time
+    datetime end_time
     }
     GUIDED_ACTIVITY {
-        int id PK, FK "SERVICE.id"
+        int id PK, FK "ACTIVITY.id"
         varchar activity_name "Class type"
         int monitor_id FK "MONITOR.id"
         int admin_id FK "ADMIN.id"
     }
     PHYSIO_SESSION {
-        int id PK, FK "SERVICE.id"
+        int id PK, FK "ACTIVITY.id"
         int physio_id FK "PHYSIO.id"
     }
     STAFF {
